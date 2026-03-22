@@ -18,7 +18,8 @@ export default function TutorialPage() {
     currentStep.visualType === "subjective-focus" ||
     currentStep.visualType === "subjective-input" ||
     currentStep.visualType === "subjective-complete" ||
-    currentStep.visualType === "subjective-edit";
+    currentStep.visualType === "subjective-edit" ||
+    currentStep.visualType === "time-warning";
 
   const handleNext = () => {
     if (currentStep.nextDisabled) return;
@@ -108,7 +109,7 @@ export default function TutorialPage() {
                   : "bg-[linear-gradient(90deg,#333333_0%,#595959_100%)] text-white"
               }`}
             >
-              {isLastStep ? "시작" : currentStep.nextLabel}
+              {currentStep.nextLabel}
             </button>
           </div>
         </div>

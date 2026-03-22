@@ -7,7 +7,8 @@ export type TutorialVisualType =
   | "subjective-focus"
   | "subjective-input"
   | "subjective-complete"
-  | "subjective-edit";
+  | "subjective-edit"
+  | "time-warning";
 
 export interface TutorialStep {
   id: number;
@@ -107,5 +108,13 @@ export const tutorialSteps: TutorialStep[] = [
     visualType: "subjective-edit",
     showPrev: true,
     nextLabel: "다음",
+  },
+  {
+    id: 10,
+    title: ["시간이 모두 지나면 시험은 종료되고 OMR카드는 자동으로 제출돼요"],
+    highlightText: "마킹하지 못한 답안은 모두 오답 처리되니 미리 마킹하세요",
+    visualType: "time-warning",
+    showPrev: true,
+    nextLabel: "시험 화면으로 이동",
   },
 ];

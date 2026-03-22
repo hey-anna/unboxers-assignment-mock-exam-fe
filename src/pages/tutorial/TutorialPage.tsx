@@ -14,7 +14,11 @@ export default function TutorialPage() {
   const isTopAlignedStep =
     currentStep.visualType === "omr-choice-empty" ||
     currentStep.visualType === "omr-choice-filled" ||
-    currentStep.visualType === "omr-choice-multi";
+    currentStep.visualType === "omr-choice-multi" ||
+    currentStep.visualType === "subjective-focus" ||
+    currentStep.visualType === "subjective-input" ||
+    currentStep.visualType === "subjective-complete" ||
+    currentStep.visualType === "subjective-edit";
 
   const handleNext = () => {
     if (currentStep.nextDisabled) return;

@@ -3,7 +3,11 @@ export type TutorialVisualType =
   | "book-omr"
   | "omr-choice-empty"
   | "omr-choice-filled"
-  | "omr-choice-multi";
+  | "omr-choice-multi"
+  | "subjective-focus"
+  | "subjective-input"
+  | "subjective-complete"
+  | "subjective-edit";
 
 export interface TutorialStep {
   id: number;
@@ -65,6 +69,42 @@ export const tutorialSteps: TutorialStep[] = [
       "두 답안 모두 마킹하면 돼요",
     ],
     visualType: "omr-choice-multi",
+    showPrev: true,
+    nextLabel: "다음",
+  },
+  {
+    id: 6,
+    helperText: "다음으로 넘어가려면 직접 해보세요",
+    title: ["주관식 답안을 입력하려면 입력할 곳을 터치해요"],
+    highlightText: "4번 문제의 답안을 입력해볼까요?",
+    visualType: "subjective-focus",
+    showPrev: true,
+    nextLabel: "다음",
+    nextDisabled: true,
+  },
+  {
+    id: 7,
+    helperText: "다음으로 넘어가려면 직접 해보세요",
+    title: ["아무 숫자나 입력하고", "완료 버튼을 눌러서 답안을 작성해요"],
+    visualType: "subjective-input",
+    showPrev: true,
+    nextLabel: "다음",
+    nextDisabled: true,
+  },
+  {
+    id: 8,
+    helperText: "다음으로 넘어가려면 직접 해보세요",
+    title: ["아무 숫자나 입력하고", "완료 버튼을 눌러서 답안을 작성해요"],
+    visualType: "subjective-complete",
+    showPrev: true,
+    nextLabel: "다음",
+    nextDisabled: true,
+  },
+  {
+    id: 9,
+    helperText: "좋아요! 다음으로 넘어가볼까요?",
+    title: ["입력한 답안을 수정하려면", "해당 문제를 다시 한 번 터치해요"],
+    visualType: "subjective-edit",
     showPrev: true,
     nextLabel: "다음",
   },

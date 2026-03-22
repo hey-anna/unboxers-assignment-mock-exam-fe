@@ -1,4 +1,4 @@
-import examOmrBoardImage from "../../assets/images/exam/exam-omr-board.svg";
+import examOmrCardImage from "../../assets/images/exam/exam-omr-card.svg";
 
 export default function ExamPage() {
   const keypadRows = [
@@ -25,7 +25,7 @@ export default function ExamPage() {
             <div className="flex-1">
               <div className="flex justify-center">
                 <img
-                  src={examOmrBoardImage}
+                  src={examOmrCardImage}
                   alt="OMR 답안 입력 화면"
                   className="block h-auto w-full max-w-[1080px] object-contain"
                 />

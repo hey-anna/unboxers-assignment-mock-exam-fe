@@ -1,1 +1,25 @@
 @import "tailwindcss";
+
+@keyframes scanMove {
+  0% {
+    left: 24%;
+  }
+  50% {
+    left: 76%;
+  }
+  100% {
+    left: 24%;
+  }
+}
+
+@keyframes scanMoveHandle {
+  0% {
+    left: 24%;
+  }
+  50% {
+    left: 76%;
+  }
+  100% {
+    left: 24%;
+  }
+}

@@ -56,9 +56,7 @@ export default function ExamPage() {
     };
   });
 
-  const [choiceAnswers, setChoiceAnswers] = useState<Record<number, number>>(
-    {},
-  );
+  const [choiceAnswers, setChoiceAnswers] = useState<Record<number, number>>({});
 
   const choiceBubblePositions = [
     ...Array.from({ length: 10 }, (_, rowIndex) => {
@@ -100,12 +98,8 @@ export default function ExamPage() {
 
   const navigate = useNavigate();
 
-  const [selectedSubjectiveIndex, setSelectedSubjectiveIndex] = useState<
-    number | null
-  >(null);
-  const [subjectiveAnswers, setSubjectiveAnswers] = useState<
-    Record<number, string>
-  >({});
+  const [selectedSubjectiveIndex, setSelectedSubjectiveIndex] = useState<number | null>(null);
+  const [subjectiveAnswers, setSubjectiveAnswers] = useState<Record<number, string>>({});
 
   const subjectiveInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -182,23 +176,19 @@ export default function ExamPage() {
                 <img
                   src={examOmrCardImage}
                   alt="OMR 답안 입력 화면"
-                  className="block h-auto w-full max-w-[1080px] object-contain"
+                  draggable={false}
+                  className="block h-auto w-full max-w-[1080px] object-contain pointer-events-none "
                 />
                 {choiceBubblePositions.map((bubble) => {
-                  const isSelected =
-                    choiceAnswers[bubble.question] === bubble.option;
+                  const isSelected = choiceAnswers[bubble.question] === bubble.option;
 
                   return (
                     <button
                       key={`${bubble.question}-${bubble.option}`}
                       type="button"
-                      onClick={() =>
-                        handleChoiceSelect(bubble.question, bubble.option)
-                      }
-                      className={`absolute z-20 flex items-center justify-center rounded-full text-[10px]  ${
-                        isSelected
-                          ? "bg-black text-white"
-                          : "bg-transparent text-transparent"
+                      onClick={() => handleChoiceSelect(bubble.question, bubble.option)}
+                      className={`absolute z-20 flex items-center justify-center rounded-full text-[clamp(9px,0.85vw,15px)]  ${
+                        isSelected ? "bg-black text-white" : "bg-transparent text-transparent"
                       }`}
                       style={{
                         top: bubble.top,
@@ -235,9 +225,7 @@ export default function ExamPage() {
 
                           <div
                             className={`pointer-events-none absolute z-10 ${
-                              value
-                                ? "bg-[#fffdf1]"
-                                : "bg-[rgba(239,241,241,1)]"
+                              value ? "bg-[#fffdf1]" : "bg-[rgba(239,241,241,1)]"
                             }`}
                             style={{
                               top: `${slot.rowTop}%`,
@@ -337,16 +325,13 @@ export default function ExamPage() {
             <aside className="w-[320px] shrink-0 pt-16">
               <div className="text-[15px] font-semibold leading-[1.75] text-[#777777]">
                 <p>
-                  모든 주관식 답은 숫자와 소수점, 슬래시(/), 마이너스(-) 기호로
-                  이루어져 있습니다.
+                  모든 주관식 답은 숫자와 소수점, 슬래시(/), 마이너스(-) 기호로 이루어져 있습니다.
                 </p>
                 <p className="mt-4">
-                  마이너스 2분의 3을 입력할 때는 “-3/2”라고 입력하면 돼요.
-                  소수점은 유효숫자 개수를 맞춰서 입력합니다.
+                  마이너스 2분의 3을 입력할 때는 “-3/2”라고 입력하면 돼요. 소수점은 유효숫자 개수를
+                  맞춰서 입력합니다.
                 </p>
-                <p className="mt-4">
-                  단위가 포함된 주관식 답안은 숫자만 입력합니다.
-                </p>
+                <p className="mt-4">단위가 포함된 주관식 답안은 숫자만 입력합니다.</p>
                 <p className="mt-6">
                   예시)
                   <br />
@@ -430,9 +415,7 @@ export default function ExamPage() {
             </div>
 
             <div className="flex min-w-[340px] items-center justify-end gap-8 pb-2">
-              <span className="text-[22px] font-bold text-[#4B4B4B]">
-                시험 시간 60분
-              </span>
+              <span className="text-[22px] font-bold text-[#4B4B4B]">시험 시간 60분</span>
 
               <button
                 type="button"

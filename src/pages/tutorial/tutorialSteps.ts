@@ -65,10 +65,7 @@ export const tutorialSteps: TutorialStep[] = [
   {
     id: 5,
     helperText: "좋아요! 다음으로 넘어가볼까요?",
-    title: [
-      "2개 이상의 답안을 골라야 하는 문제에서는",
-      "두 답안 모두 마킹하면 돼요",
-    ],
+    title: ["2개 이상의 답안을 골라야 하는 문제에서는", "두 답안 모두 마킹하면 돼요"],
     visualType: "omr-choice-multi",
     showPrev: true,
     nextLabel: "다음",

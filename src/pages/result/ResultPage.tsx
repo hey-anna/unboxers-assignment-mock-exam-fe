@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 
 import examOmrCardImage from "../../assets/images/exam/exam-omr-card.svg";
 import logoImage from "../../assets/images/logo.svg";
@@ -7,6 +7,16 @@ import logoImage from "../../assets/images/logo.svg";
 type ResultStage = "submitted" | "scanning" | "done";
 
 export default function ResultPage() {
+  const location = useLocation();
+  const resultState = location.state as
+    | {
+        examTitle?: string;
+        subjectiveAnswers?: Record<number, string>;
+      }
+    | undefined;
+
+  const examTitle = resultState?.examTitle ?? "공통수학2";
+
   const [stage, setStage] = useState<ResultStage>("submitted");
 
   const handleViewResult = () => {
@@ -107,18 +117,12 @@ export default function ResultPage() {
           </div>
 
           <div className="mt-[110px] flex flex-col items-center">
-            <img
-              src={logoImage}
-              alt="로고"
-              className="block h-[110px] w-[110px] object-contain"
-            />
+            <img src={logoImage} alt="로고" className="block h-[110px] w-[110px] object-contain" />
 
-            <p className="mt-8 text-[24px] font-bold text-[#222222]">
-              채점이 완료되었어요!
-            </p>
+            <p className="mt-8 text-[24px] font-bold text-[#222222]">채점이 완료되었어요!</p>
 
             <h1 className="mt-3 text-[64px] font-extrabold leading-none text-[#111111]">
-              공통수학2
+              {examTitle}
             </h1>
 
             <div className="mt-12 grid grid-cols-3 gap-6">
@@ -130,18 +134,14 @@ export default function ResultPage() {
               </div>
 
               <div className="flex h-[176px] w-[220px] flex-col items-center justify-center rounded-[24px] bg-white shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
-                <p className="text-[24px] font-bold text-[#333333]">
-                  맞힌 문제
-                </p>
+                <p className="text-[24px] font-bold text-[#333333]">맞힌 문제</p>
                 <p className="mt-4 text-[58px] font-extrabold leading-none text-[#111111]">
                   8<span className="ml-1 text-[30px] font-bold">개</span>
                 </p>
               </div>
 
               <div className="flex h-[176px] w-[220px] flex-col items-center justify-center rounded-[24px] bg-white shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
-                <p className="text-[24px] font-bold text-[#333333]">
-                  복습해야 할 오답
-                </p>
+                <p className="text-[24px] font-bold text-[#333333]">복습해야 할 오답</p>
                 <p className="mt-4 text-[58px] font-extrabold leading-none text-[#111111]">
                   17<span className="ml-1 text-[30px] font-bold">개</span>
                 </p>

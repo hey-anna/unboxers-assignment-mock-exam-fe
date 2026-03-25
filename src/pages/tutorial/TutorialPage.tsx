@@ -6,7 +6,7 @@ import { tutorialSteps } from "./tutorialSteps";
 
 export default function TutorialPage() {
   const navigate = useNavigate();
-  const [stepIndex, setStepIndex] = useState(0);
+  const [stepIndex, setStepIndex] = useState(8);
 
   const currentStep = tutorialSteps[stepIndex];
   const isLastStep = stepIndex === tutorialSteps.length - 1;
@@ -60,10 +60,7 @@ export default function TutorialPage() {
           )}
 
           {currentStep.title.map((line) => (
-            <p
-              key={line}
-              className="m-0 text-[28px] font-bold leading-[1.45] text-[#111111]"
-            >
+            <p key={line} className="m-0 text-[28px] font-bold leading-[1.45] text-[#111111]">
               {line}
             </p>
           ))}

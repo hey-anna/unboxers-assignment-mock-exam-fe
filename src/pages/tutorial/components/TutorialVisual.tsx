@@ -142,9 +142,7 @@ export default function TutorialVisual({ visualType }: Props) {
             </p>
 
             <div className="mt-4 flex items-end gap-3">
-              <span className="text-[68px] font-extrabold leading-none text-[#F4574B]">
-                5초
-              </span>
+              <span className="text-[68px] font-extrabold leading-none text-[#F4574B]">5초</span>
               <span className="mb-[8px] text-[18px] font-semibold text-[#666666]">
                 시험 시간 60분
               </span>

@@ -182,7 +182,8 @@ export default function ExamPage() {
                 <img
                   src={examOmrCardImage}
                   alt="OMR 답안 입력 화면"
-                  className="block h-auto w-full max-w-[1080px] object-contain"
+                  draggable={false}
+                  className="block h-auto w-full max-w-[1080px] object-contain pointer-events-none "
                 />
                 {choiceBubblePositions.map((bubble) => {
                   const isSelected =
@@ -195,7 +196,7 @@ export default function ExamPage() {
                       onClick={() =>
                         handleChoiceSelect(bubble.question, bubble.option)
                       }
-                      className={`absolute z-20 flex items-center justify-center rounded-full text-[10px]  ${
+                      className={`absolute z-20 flex items-center justify-center rounded-full text-[clamp(9px,0.85vw,15px)]  ${
                         isSelected
                           ? "bg-black text-white"
                           : "bg-transparent text-transparent"

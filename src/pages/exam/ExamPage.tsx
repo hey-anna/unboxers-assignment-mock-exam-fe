@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import examOmrCardImage from "../../assets/images/exam/exam-omr-card.svg";
 
@@ -22,20 +22,39 @@ export default function ExamPage() {
 
   const OPTION_GAP = 2.31; // 1 -> 2 -> 3 ... 가로 간격
 
-  const subjectiveSlots = [
-    { id: 1, top: "11.5%", left: "72.5%" },
-    { id: 2, top: "19.2%", left: "72.5%" },
-    { id: 3, top: "27%", left: "72.5%" },
-    { id: 4, top: "34.8%", left: "72.5%" },
-    { id: 5, top: "42.5%", left: "72.5%" },
-    { id: 6, top: "50.3%", left: "72.5%" },
-    { id: 7, top: "58.1%", left: "72.5%" },
-    { id: 8, top: "65.8%", left: "72.5%" },
-    { id: 9, top: "73.6%", left: "72.5%" },
-    { id: 10, top: "81.3%", left: "72.5%" },
-    { id: 11, top: "89.1%", left: "72.5%" },
-    { id: 12, top: "96%", left: "72.5%" },
-  ];
+  const SUBJECTIVE_ROW_START_TOP = 9.99;
+  const SUBJECTIVE_ROW_GAP = 6.905;
+
+  const SUBJECTIVE_ROW_LEFT = 69.2;
+  const SUBJECTIVE_ROW_WIDTH = 27.635;
+
+  const SUBJECTIVE_ROW_HEIGHT = 6.698;
+
+  const SUBJECTIVE_INPUT_START_TOP = 13.35;
+  const SUBJECTIVE_INPUT_GAP = 6.9;
+  // const SUBJECTIVE_INPUT_LEFT = 75.0;
+  const SUBJECTIVE_INPUT_LEFT = 73.75;
+  const SUBJECTIVE_INPUT_WIDTH = 20.8;
+  const SUBJECTIVE_INPUT_HEIGHT = 3.8;
+
+  const subjectiveSlots = Array.from({ length: 12 }, (_, index) => {
+    const id = index + 1;
+
+    return {
+      id,
+      rowTop: SUBJECTIVE_ROW_START_TOP + SUBJECTIVE_ROW_GAP * index,
+
+      rowLeft: SUBJECTIVE_ROW_LEFT,
+      rowWidth: SUBJECTIVE_ROW_WIDTH,
+      rowHeight: SUBJECTIVE_ROW_HEIGHT,
+
+      // 아래는 나중에 input 맞출 때 다시 손보면 됨
+      inputTop: SUBJECTIVE_INPUT_START_TOP + SUBJECTIVE_INPUT_GAP * index,
+      inputLeft: SUBJECTIVE_INPUT_LEFT,
+      inputWidth: SUBJECTIVE_INPUT_WIDTH,
+      inputHeight: SUBJECTIVE_INPUT_HEIGHT,
+    };
+  });
 
   const [choiceAnswers, setChoiceAnswers] = useState<Record<number, number>>(
     {},
@@ -87,6 +106,14 @@ export default function ExamPage() {
   const [subjectiveAnswers, setSubjectiveAnswers] = useState<
     Record<number, string>
   >({});
+
+  const subjectiveInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (selectedSubjectiveIndex !== null) {
+      subjectiveInputRef.current?.focus();
+    }
+  }, [selectedSubjectiveIndex]);
 
   const handleKeypadClick = (value: string) => {
     if (selectedSubjectiveIndex === null) return;
@@ -189,20 +216,119 @@ export default function ExamPage() {
                 {subjectiveSlots.map((slot) => {
                   const isSelected = selectedSubjectiveIndex === slot.id;
                   const value = subjectiveAnswers[slot.id] ?? "";
+
                   return (
-                    <button
-                      key={slot.id}
-                      type="button"
-                      onClick={() => setSelectedSubjectiveIndex(slot.id)}
-                      className={`absolute z-10 flex h-[28px] w-[180px] -translate-y-1/2  items-center justify-center rounded-md border text-[13px] font-medium transition ${
-                        isSelected
-                          ? "border-[#3B82F6] bg-[#DBEAFE] text-[#1D4ED8]"
-                          : "border-transparent bg-transparent text-[#111827]"
-                      }`}
-                      style={{ top: slot.top, left: slot.left }}
-                    >
-                      {value || "입력"}
-                    </button>
+                    <div key={slot.id}>
+                      {(isSelected || value) && (
+                        <>
+                          {isSelected && (
+                            <div
+                              className="pointer-events-none absolute z-10 bg-[rgb(145,186,254,0.3)]"
+                              style={{
+                                top: `${slot.rowTop}%`,
+                                left: `${slot.rowLeft}%`,
+                                width: `2.1%`,
+                                height: `${slot.rowHeight}%`,
+                              }}
+                            />
+                          )}
+
+                          <div
+                            className={`pointer-events-none absolute z-10 ${
+                              value
+                                ? "bg-[#fffdf1]"
+                                : "bg-[rgba(239,241,241,1)]"
+                            }`}
+                            style={{
+                              top: `${slot.rowTop}%`,
+                              left: `calc(${slot.rowLeft}% + 2.1% + 0.12%)`,
+                              width: `calc(${slot.rowWidth}% - 2.1% - 0.12%)`,
+                              height: `${slot.rowHeight}%`,
+                            }}
+                          />
+                        </>
+                      )}
+                      <div
+                        className="absolute z-20 rounded-[0.4vw] "
+                        style={{
+                          top: `${slot.inputTop}%`,
+                          left: `${slot.inputLeft}%`,
+                          width: `${slot.inputWidth}%`,
+                          height: `${slot.inputHeight}%`,
+                          transform: "translateY(-50%)",
+                        }}
+                      >
+                        {value && (
+                          <div className="pointer-events-none absolute inset-0 z-10 rounded-[0.4vw] bg-[#fffdf1]" />
+                        )}
+
+                        {!isSelected && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedSubjectiveIndex(slot.id);
+                              requestAnimationFrame(() => {
+                                subjectiveInputRef.current?.focus();
+                              });
+                            }}
+                            className="absolute inset-0 z-10 bg-transparent "
+                          />
+                        )}
+                        {isSelected ? (
+                          <div className="relative z-30 flex h-full w-full items-center justify-center">
+                            {!value && (
+                              <span
+                                className="pointer-events-none absolute left-1/2 top-1/2 z-30
+                                  -translate-x-1/2 -translate-y-1/2
+                                  whitespace-nowrap text-center font-medium leading-none
+                                  text-[clamp(9px,0.95vw,14px)] text-[#b7b7b7]"
+                              >
+                                답을 입력해주세요.
+                              </span>
+                            )}
+
+                            {value && (
+                              <span
+                                className="pointer-events-none absolute left-1/2 top-1/2 z-30
+                                  -translate-x-1/2 -translate-y-1/2
+                                  whitespace-nowrap text-center font-medium leading-none
+                                  text-[clamp(9px,0.95vw,14px)] text-[#7a7a7a]"
+                              >
+                                {value}
+                              </span>
+                            )}
+
+                            <input
+                              ref={subjectiveInputRef}
+                              value={value}
+                              readOnly
+                              autoFocus
+                              className="relative z-20 h-full w-full bg-transparent
+                                text-transparent caret-[#666666] outline-none"
+                            />
+
+                            {!value && (
+                              <div
+                                className="
+      pointer-events-none absolute left-1/2 top-1/2 z-30
+      h-[62%] w-[2px]
+      -translate-x-1/2 -translate-y-1/2
+      bg-[#4b4b4b] animate-[cursorBlink_1s_steps(1,end)_infinite]
+    "
+                              />
+                            )}
+                          </div>
+                        ) : value ? (
+                          <div
+                            className="relative z-30 flex h-full w-full items-center justify-center
+                                text-center font-medium leading-none
+                                text-[clamp(9px,0.95vw,14px)] text-[#7a7a7a]"
+                          >
+                            {value}
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
                   );
                 })}
               </div>

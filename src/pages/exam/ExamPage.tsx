@@ -2,6 +2,24 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import examOmrCardImage from "../../assets/images/exam/exam-omr-card.svg";
 
+type GradeResultItem = {
+  answerType: "objective" | "subjective";
+  number: number;
+  result: "correct" | "wrong" | "unanswered";
+};
+
+type SubmitExamResponse = {
+  message: string;
+  data: {
+    title: string;
+    score: number;
+    correctCount: number;
+    wrongCount: number;
+    unansweredCount: number;
+    results: GradeResultItem[];
+  };
+};
+
 export default function ExamPage() {
   const keypadRows = [
     [".", "/", "-"],
@@ -122,10 +140,6 @@ export default function ExamPage() {
         };
       }
 
-      // if (value === "done") {
-      //   return prev;
-      // }
-
       if (current.length >= 6) return prev;
 
       return {
@@ -140,14 +154,88 @@ export default function ExamPage() {
     setSelectedSubjectiveIndex(null);
   };
 
-  const handleSubmitExam = () => {
-    navigate("/result", {
-      state: {
-        examTitle: "공통수학 2",
-        subjectiveAnswers,
-        choiceAnswers,
-      },
-    });
+  const parseSubjectiveAnswer = (value: string) => {
+    const trimmed = value.trim();
+
+    if (!trimmed) return null;
+
+    if (trimmed.includes("/")) {
+      const [numerator, denominator] = trimmed.split("/");
+
+      const top = Number(numerator);
+      const bottom = Number(denominator);
+
+      if (Number.isNaN(top) || Number.isNaN(bottom) || bottom === 0) {
+        return null;
+      }
+
+      return top / bottom;
+    }
+
+    const numericValue = Number(trimmed);
+
+    if (Number.isNaN(numericValue)) {
+      return null;
+    }
+
+    return numericValue;
+  };
+
+  const handleSubmitExam = async () => {
+    const objectivePayload = Object.entries(choiceAnswers).map(([number, answer]) => ({
+      answerType: "objective" as const,
+      number: Number(number),
+      answer,
+    }));
+
+    const subjectivePayload = Object.entries(subjectiveAnswers)
+      .map(([number, answer]) => ({
+        answerType: "subjective" as const,
+        number: Number(number),
+        answer: parseSubjectiveAnswer(answer),
+      }))
+      .filter((item) => item.answer !== null)
+      .map((item) => ({
+        ...item,
+        answer: item.answer as number,
+      }));
+
+    const requestBody = {
+      name: "홍길동",
+      school: "언박서즈고",
+      grade: 3,
+      studentNumber: 1,
+      seatNumber: 1,
+      answers: [...objectivePayload, ...subjectivePayload],
+    };
+
+    try {
+      const response = await fetch("http://127.0.0.1:3001/api/exams/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error("시험 제출에 실패했습니다.");
+      }
+
+      const result: SubmitExamResponse = await response.json();
+
+      navigate("/result", {
+        state: {
+          examTitle: result.data.title,
+          subjectiveAnswers,
+          choiceAnswers,
+          gradeResult: result.data,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      alert("시험 제출 중 오류가 발생했습니다.");
+    }
   };
 
   const handleChoiceSelect = (question: number, option: number) => {
@@ -255,9 +343,6 @@ export default function ExamPage() {
                             type="button"
                             onClick={() => {
                               setSelectedSubjectiveIndex(slot.id);
-                              requestAnimationFrame(() => {
-                                subjectiveInputRef.current?.focus();
-                              });
                             }}
                             className="absolute inset-0 z-10 bg-transparent "
                           />
@@ -296,14 +381,7 @@ export default function ExamPage() {
                             />
 
                             {!value && (
-                              <div
-                                className="
-      pointer-events-none absolute left-1/2 top-1/2 z-30
-      h-[62%] w-[2px]
-      -translate-x-1/2 -translate-y-1/2
-      bg-[#4b4b4b] animate-[cursorBlink_1s_steps(1,end)_infinite]
-    "
-                              />
+                              <div className="pointer-events-none absolute left-1/2 top-1/2 z-30 h-[62%] w-[2px] -translate-x-1/2 -translate-y-1/2 bg-[#4b4b4b] animate-[cursorBlink_1s_steps(1,end)_infinite]" />
                             )}
                           </div>
                         ) : value ? (

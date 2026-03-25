@@ -12,6 +12,30 @@ type GradeResultItem = {
   result: "correct" | "wrong" | "unanswered";
 };
 
+const CHOICE_WIDTH = 1.52;
+const CHOICE_HEIGHT = 6.35;
+
+const BASE_TOP = 14.85;
+const ROW_GAP = 8.1;
+
+const COL_1_10_START = 30.02;
+const COL_11_20_START = 44.22;
+const COL_21_30_START = 58.45;
+
+const OPTION_GAP = 2.31;
+
+const SUBJECTIVE_ROW_START_TOP = 9.99;
+const SUBJECTIVE_ROW_GAP = 6.905;
+const SUBJECTIVE_ROW_LEFT = 69.2;
+const SUBJECTIVE_ROW_WIDTH = 27.635;
+const SUBJECTIVE_ROW_HEIGHT = 6.698;
+
+const SUBJECTIVE_INPUT_START_TOP = 13.35;
+const SUBJECTIVE_INPUT_GAP = 6.9;
+const SUBJECTIVE_INPUT_LEFT = 73.75;
+const SUBJECTIVE_INPUT_WIDTH = 20.8;
+const SUBJECTIVE_INPUT_HEIGHT = 3.8;
+
 type GradeResult = {
   title: string;
   score: number;
@@ -31,6 +55,9 @@ export default function ResultPage() {
       }
     | undefined;
 
+  const subjectiveAnswers = resultState?.subjectiveAnswers ?? {};
+  const choiceAnswers = resultState?.choiceAnswers ?? {};
+
   const examTitle = resultState?.examTitle ?? "공통수학2";
   const gradeResult = resultState?.gradeResult;
   const score = gradeResult?.score ?? 0;
@@ -38,6 +65,128 @@ export default function ResultPage() {
   const wrongCount = gradeResult?.wrongCount ?? 0;
 
   const [stage, setStage] = useState<ResultStage>("submitted");
+
+  const subjectiveSlots = Array.from({ length: 12 }, (_, index) => {
+    const id = index + 1;
+
+    return {
+      id,
+      rowTop: SUBJECTIVE_ROW_START_TOP + SUBJECTIVE_ROW_GAP * index,
+      rowLeft: SUBJECTIVE_ROW_LEFT,
+      rowWidth: SUBJECTIVE_ROW_WIDTH,
+      rowHeight: SUBJECTIVE_ROW_HEIGHT,
+      inputTop: SUBJECTIVE_INPUT_START_TOP + SUBJECTIVE_INPUT_GAP * index,
+      inputLeft: SUBJECTIVE_INPUT_LEFT,
+      inputWidth: SUBJECTIVE_INPUT_WIDTH,
+      inputHeight: SUBJECTIVE_INPUT_HEIGHT,
+    };
+  });
+
+  const choiceBubblePositions = [
+    ...Array.from({ length: 10 }, (_, rowIndex) => {
+      const question = 1 + rowIndex;
+      const top = BASE_TOP + ROW_GAP * rowIndex;
+
+      return Array.from({ length: 5 }, (_, optionIndex) => ({
+        question,
+        option: optionIndex + 1,
+        top: `${top}%`,
+        left: `${COL_1_10_START + OPTION_GAP * optionIndex}%`,
+      }));
+    }).flat(),
+
+    ...Array.from({ length: 10 }, (_, rowIndex) => {
+      const question = 11 + rowIndex;
+      const top = BASE_TOP + ROW_GAP * rowIndex;
+
+      return Array.from({ length: 5 }, (_, optionIndex) => ({
+        question,
+        option: optionIndex + 1,
+        top: `${top}%`,
+        left: `${COL_11_20_START + OPTION_GAP * optionIndex}%`,
+      }));
+    }).flat(),
+
+    ...Array.from({ length: 10 }, (_, rowIndex) => {
+      const question = 21 + rowIndex;
+      const top = BASE_TOP + ROW_GAP * rowIndex;
+
+      return Array.from({ length: 5 }, (_, optionIndex) => ({
+        question,
+        option: optionIndex + 1,
+        top: `${top}%`,
+        left: `${COL_21_30_START + OPTION_GAP * optionIndex}%`,
+      }));
+    }).flat(),
+  ];
+
+  const renderFilledOmrCard = (alt: string) => {
+    return (
+      <div className="relative w-full max-w-[760px]">
+        <img src={examOmrCardImage} alt={alt} className="block h-auto w-full object-contain" />
+
+        {choiceBubblePositions.map((bubble) => {
+          const isSelected = choiceAnswers[bubble.question] === bubble.option;
+
+          return (
+            <div
+              key={`${bubble.question}-${bubble.option}`}
+              className={`pointer-events-none absolute z-20 flex items-center justify-center rounded-full text-[clamp(7px,0.75vw,12px)] ${
+                isSelected ? "bg-black text-white" : "bg-transparent text-transparent"
+              }`}
+              style={{
+                top: bubble.top,
+                left: bubble.left,
+                width: `${CHOICE_WIDTH}%`,
+                height: `${CHOICE_HEIGHT}%`,
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              {bubble.option}
+            </div>
+          );
+        })}
+
+        {subjectiveSlots.map((slot) => {
+          const value = subjectiveAnswers[slot.id] ?? "";
+
+          if (!value) {
+            return null;
+          }
+
+          return (
+            <div key={slot.id}>
+              <div
+                className="pointer-events-none absolute z-10 bg-[#fffdf1]"
+                style={{
+                  top: `${slot.rowTop}%`,
+                  left: `calc(${slot.rowLeft}% + 2.1% + 0.12%)`,
+                  width: `calc(${slot.rowWidth}% - 2.1% - 0.12%)`,
+                  height: `${slot.rowHeight}%`,
+                }}
+              />
+
+              <div
+                className="absolute z-20 rounded-[0.4vw]"
+                style={{
+                  top: `${slot.inputTop}%`,
+                  left: `${slot.inputLeft}%`,
+                  width: `${slot.inputWidth}%`,
+                  height: `${slot.inputHeight}%`,
+                  transform: "translateY(-50%)",
+                }}
+              >
+                <div className="pointer-events-none absolute inset-0 z-10 rounded-[0.4vw] bg-[#fffdf1]" />
+                <div className="relative z-30 flex h-full w-full items-center justify-center text-center font-medium leading-none text-[clamp(9px,0.95vw,14px)] text-[#7a7a7a]">
+                  {value}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   const handleViewResult = () => {
     setStage("scanning");
@@ -61,12 +210,7 @@ export default function ResultPage() {
           </div>
 
           <div className="mt-[90px] flex w-full flex-col items-center">
-            <img
-              src={examOmrCardImage}
-              alt="답안 제출 완료 OMR 카드"
-              className="block h-auto w-full max-w-[760px] object-contain"
-            />
-
+            {renderFilledOmrCard("답안 제출 완료 OMR 카드")}
             <div className="mt-12 text-center">
               <p className="text-[56px] font-extrabold leading-[1.2] text-[#111111]">
                 답안 제출 완료!
@@ -89,12 +233,8 @@ export default function ResultPage() {
 
       {stage === "scanning" && (
         <div className="mx-auto flex min-h-[calc(100vh-65px-48px)] max-w-[1280px] flex-col items-center justify-center">
-          <div className="relative">
-            <img
-              src={examOmrCardImage}
-              alt="OMR 카드 스캔 중"
-              className="block h-auto w-full max-w-[760px] object-contain"
-            />
+          <div className="relative w-full max-w-[760px]">
+            {renderFilledOmrCard("OMR 카드 스캔 중")}
 
             <div className="pointer-events-none absolute inset-y-[8px] left-1/2 z-20 w-[28px] -translate-x-1/2 animate-[scanMove_2.4s_ease-in-out_infinite]">
               <div className="absolute inset-y-0 left-1/2 w-[5px] -translate-x-1/2 rounded-full bg-[#FF3B30]" />

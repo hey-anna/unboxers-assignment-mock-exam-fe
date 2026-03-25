@@ -6,16 +6,36 @@ import logoImage from "../../assets/images/logo.svg";
 
 type ResultStage = "submitted" | "scanning" | "done";
 
+type GradeResultItem = {
+  answerType: "objective" | "subjective";
+  number: number;
+  result: "correct" | "wrong" | "unanswered";
+};
+
+type GradeResult = {
+  title: string;
+  score: number;
+  correctCount: number;
+  wrongCount: number;
+  unansweredCount: number;
+  results: GradeResultItem[];
+};
 export default function ResultPage() {
   const location = useLocation();
   const resultState = location.state as
     | {
         examTitle?: string;
         subjectiveAnswers?: Record<number, string>;
+        choiceAnswers?: Record<number, number>;
+        gradeResult?: GradeResult;
       }
     | undefined;
 
   const examTitle = resultState?.examTitle ?? "공통수학2";
+  const gradeResult = resultState?.gradeResult;
+  const score = gradeResult?.score ?? 0;
+  const correctCount = gradeResult?.correctCount ?? 0;
+  const wrongCount = gradeResult?.wrongCount ?? 0;
 
   const [stage, setStage] = useState<ResultStage>("submitted");
 
@@ -129,21 +149,24 @@ export default function ResultPage() {
               <div className="flex h-[176px] w-[220px] flex-col items-center justify-center rounded-[24px] bg-white shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
                 <p className="text-[24px] font-bold text-[#333333]">점수</p>
                 <p className="mt-4 text-[58px] font-extrabold leading-none text-[#111111]">
-                  28.5<span className="ml-1 text-[30px] font-bold">점</span>
+                  {score}
+                  <span className="ml-1 text-[30px] font-bold">점</span>
                 </p>
               </div>
 
               <div className="flex h-[176px] w-[220px] flex-col items-center justify-center rounded-[24px] bg-white shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
                 <p className="text-[24px] font-bold text-[#333333]">맞힌 문제</p>
                 <p className="mt-4 text-[58px] font-extrabold leading-none text-[#111111]">
-                  8<span className="ml-1 text-[30px] font-bold">개</span>
+                  {correctCount}
+                  <span className="ml-1 text-[30px] font-bold">개</span>
                 </p>
               </div>
 
               <div className="flex h-[176px] w-[220px] flex-col items-center justify-center rounded-[24px] bg-white shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
                 <p className="text-[24px] font-bold text-[#333333]">복습해야 할 오답</p>
                 <p className="mt-4 text-[58px] font-extrabold leading-none text-[#111111]">
-                  17<span className="ml-1 text-[30px] font-bold">개</span>
+                  {wrongCount}
+                  <span className="ml-1 text-[30px] font-bold">개</span>
                 </p>
               </div>
             </div>

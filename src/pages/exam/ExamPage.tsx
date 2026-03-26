@@ -118,11 +118,8 @@ export default function ExamPage() {
 
   const navigate = useNavigate();
 
-  // const READY_DURATION_SECONDS = 3 * 60 + 17; // 3분 17초
-  // const EXAM_DURATION_SECONDS = 60; // 일단 샘플처럼 1분이면 60, 실제 60분이면 60 * 60
-
-  const READY_DURATION_SECONDS = 3;
-  const EXAM_DURATION_SECONDS = 60;
+  const READY_DURATION_SECONDS = 1 * 20;
+  const EXAM_DURATION_SECONDS = 3 * 60; // 1분이면 60, 실제 60분이면 60 * 60
 
   type ExamPhase = "ready" | "running" | "submitted";
 
@@ -342,9 +339,9 @@ export default function ExamPage() {
             </button>
           </div>
 
-          <div className="relative mx-auto flex w-full max-w-[1360px] items-start justify-center gap-10">
-            <div className="flex-1">
-              <div className="relative w-full max-w-[1080px]">
+          <div className="relative mx-auto grid w-full max-w-[1360px] grid-cols-[minmax(0,1080fr)_minmax(160px,240fr)] items-start gap-[clamp(12px,2.4vw,40px)]">
+            <div className="min-w-0">
+              <div className="relative w-full">
                 <img
                   src={examOmrCardImage}
                   alt="OMR 답안 입력 화면"
@@ -485,17 +482,17 @@ export default function ExamPage() {
               </div>
             </div>
 
-            <aside className="w-[320px] shrink-0 pt-16">
-              <div className="text-[15px] font-semibold leading-[1.75] text-[#777777]">
+            <aside className="w-[240px] shrink-0">
+              <div className="text-[10px] font-semibold leading-[1.5] text-[#777777] mt-3">
                 <p>
                   모든 주관식 답은 숫자와 소수점, 슬래시(/), 마이너스(-) 기호로 이루어져 있습니다.
                 </p>
-                <p className="mt-4">
+                <p className="mt-1.5">
                   마이너스 2분의 3을 입력할 때는 “-3/2”라고 입력하면 돼요. 소수점은 유효숫자 개수를
                   맞춰서 입력합니다.
                 </p>
-                <p className="mt-4">단위가 포함된 주관식 답안은 숫자만 입력합니다.</p>
-                <p className="mt-6">
+                <p className="mt-1.5">단위가 포함된 주관식 답안은 숫자만 입력합니다.</p>
+                <p className="mt-1.5">
                   예시)
                   <br />
                   제3사분면 → 3
@@ -506,23 +503,23 @@ export default function ExamPage() {
                 </p>
               </div>
 
-              <div className="mt-10">
+              <div className="mt-5">
                 <button
                   type="button"
-                  className="flex h-[64px] w-full items-center justify-center rounded-[16px] bg-[#FAFAFA] text-[18px] font-bold text-[#B8B8B8] shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                  className="flex h-[44px] w-full items-center justify-center rounded-[12px] bg-[#FAFAFA] px-2 text-[13px] font-bold text-[#B8B8B8] shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
                 >
                   {selectedSubjectiveIndex === null
                     ? "입력할 곳을 터치해주세요"
                     : `주관식 ${selectedSubjectiveIndex}번 입력 중`}
                 </button>
 
-                <div className="mt-4 grid grid-cols-3 gap-3">
+                <div className="mt-3 grid grid-cols-3 gap-2.5">
                   {keypadRows.flat().map((key) => (
                     <button
                       key={key}
                       type="button"
                       onClick={() => handleKeypadClick(key)}
-                      className="flex h-[64px] items-center justify-center rounded-[16px] bg-[#FAFAFA] text-[20px] font-extrabold text-[#111111] shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                      className="flex h-[44px] items-center justify-center rounded-[12px] bg-[#FAFAFA] text-[14px] font-bold text-[#555555] shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition active:scale-[0.98]"
                     >
                       {key}
                     </button>
@@ -531,7 +528,7 @@ export default function ExamPage() {
                   <button
                     type="button"
                     onClick={() => handleKeypadClick("0")}
-                    className="col-span-2 flex h-[64px] items-center justify-center rounded-[16px] bg-[#FAFAFA] text-[20px] font-extrabold text-[#111111] shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                    className="col-span-2 flex h-[44px] items-center justify-center rounded-[12px] bg-[#FAFAFA] text-[14px] font-bold text-[#555555] shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition active:scale-[0.98]"
                   >
                     0
                   </button>
@@ -539,7 +536,7 @@ export default function ExamPage() {
                   <button
                     type="button"
                     onClick={() => handleKeypadClick("backspace")}
-                    className="flex h-[64px] items-center justify-center rounded-[16px] bg-[#FAFAFA] text-[20px] font-extrabold text-[#111111] shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                    className="flex h-[44px] items-center justify-center rounded-[12px] bg-[#FAFAFA] text-[14px] font-bold text-[#555555] shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition active:scale-[0.98]"
                   >
                     ⌫
                   </button>
@@ -548,11 +545,7 @@ export default function ExamPage() {
                 <button
                   type="button"
                   onClick={handleComplete}
-                  className={`mt-4 h-[56px] w-full  rounded-2xl text-[18px] font-semibold transition ${
-                    selectedSubjectiveIndex === null
-                      ? "bg-[#E5E7EB] text-[#9CA3AF]"
-                      : "bg-[#2563EB] text-white"
-                  }`}
+                  className="mt-3 h-[40px] w-full rounded-[12px] bg-[#FAFAFA] text-[14px] font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition"
                 >
                   완료
                 </button>

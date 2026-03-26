@@ -122,7 +122,7 @@ export default function TutorialVisual({ visualType }: Props) {
 
   if (visualType === "subjective-edit") {
     return (
-      <div className="flex w-full items-start justify-center">
+      <div className="flex max-w-[320px] items-start justify-center">
         <img
           src={subjectiveEditImage}
           alt="주관식 수정 안내 이미지"
@@ -133,7 +133,7 @@ export default function TutorialVisual({ visualType }: Props) {
   }
 
   return (
-    <div className="flex w-full justify-center pt-[260px]">
+    <div className="flex w-full justify-center pt-[120px]">
       <div className="w-full max-w-[1030px] rounded-[20px] bg-white px-10 py-8 shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
         <div className="flex items-center justify-between gap-8">
           <div className="flex-1">

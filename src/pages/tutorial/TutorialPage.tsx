@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import TutorialVisual from "./components/TutorialVisual";
@@ -6,7 +6,7 @@ import { tutorialSteps } from "./tutorialSteps";
 
 export default function TutorialPage() {
   const navigate = useNavigate();
-  const [stepIndex, setStepIndex] = useState(8);
+  const [stepIndex, setStepIndex] = useState(0);
 
   const currentStep = tutorialSteps[stepIndex];
   const isLastStep = stepIndex === tutorialSteps.length - 1;
@@ -22,7 +22,7 @@ export default function TutorialPage() {
     currentStep.visualType === "time-warning";
 
   const handleNext = () => {
-    if (currentStep.nextDisabled) return;
+    // if (currentStep.nextDisabled) return;
 
     if (isLastStep) {
       navigate("/exam");
@@ -41,8 +41,56 @@ export default function TutorialPage() {
     navigate("/exam");
   };
 
+  useEffect(() => {
+    const autoMoveTypes = [
+      "book",
+      "book-omr",
+      "omr-choice-empty",
+      "omr-choice-filled",
+      "omr-choice-multi",
+      "subjective-focus",
+      "subjective-input",
+      "subjective-complete",
+      "subjective-edit",
+      "time-warning",
+    ];
+
+    console.log("currentStep:", stepIndex, currentStep.visualType);
+    console.log("includes:", autoMoveTypes.includes(currentStep.visualType));
+
+    if (!autoMoveTypes.includes(currentStep.visualType)) return;
+
+    const stepDelayMap: Record<string, number> = {
+      book: 2600,
+      "book-omr": 2600,
+      "omr-choice-empty": 3000,
+      "omr-choice-filled": 2200,
+      "omr-choice-multi": 2400,
+      "subjective-focus": 2800,
+      "subjective-input": 2800,
+      "subjective-complete": 2400,
+      "subjective-edit": 2400,
+      "time-warning": 3200,
+    };
+
+    const delay = stepDelayMap[currentStep.visualType] ?? 2500;
+
+    const timer = window.setTimeout(() => {
+      if (isLastStep) {
+        navigate("/exam");
+        return;
+      }
+
+      setStepIndex((prev) => prev + 1);
+    }, delay);
+
+    return () => window.clearTimeout(timer);
+  }, [stepIndex, currentStep.visualType, isLastStep, navigate]);
   return (
     <section className="min-h-[calc(100vh-65px)] bg-[#f3f3f3] px-8">
+      <div className="fixed top-2 left-2 z-[9999] bg-red-500 px-2 py-1 text-white">
+        tutorial-{stepIndex}-{currentStep.visualType}
+      </div>
       <div
         className={`mx-auto flex w-full max-w-[1200px] flex-col items-center ${
           isTopAlignedStep
@@ -95,16 +143,10 @@ export default function TutorialPage() {
             >
               튜토리얼 건너뛰기
             </button>
-
             <button
               type="button"
               onClick={handleNext}
-              disabled={currentStep.nextDisabled}
-              className={`flex h-[70px] min-w-[220px] items-center justify-center rounded-[14px] px-7 text-[22px] font-bold ${
-                currentStep.nextDisabled
-                  ? "bg-[#e9e9e9] text-[#b8b8b8]"
-                  : "bg-[linear-gradient(90deg,#333333_0%,#595959_100%)] text-white"
-              }`}
+              className="flex h-[70px] min-w-[220px] items-center justify-center rounded-[14px] bg-[linear-gradient(90deg,#333333_0%,#595959_100%)] px-7 text-[22px] font-bold text-white"
             >
               {currentStep.nextLabel}
             </button>

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import examOmrCardImage from "../../assets/images/exam/exam-omr-card.svg";
 
+import { formatMinutesSeconds, formatSecondsOnly, getProgressPercent } from "../../utils/time";
+
 type GradeResultItem = {
   answerType: "objective" | "subjective";
   number: number;
@@ -116,6 +118,19 @@ export default function ExamPage() {
 
   const navigate = useNavigate();
 
+  // const READY_DURATION_SECONDS = 3 * 60 + 17; // 3분 17초
+  // const EXAM_DURATION_SECONDS = 60; // 일단 샘플처럼 1분이면 60, 실제 60분이면 60 * 60
+
+  const READY_DURATION_SECONDS = 3;
+  const EXAM_DURATION_SECONDS = 60;
+
+  type ExamPhase = "ready" | "running" | "submitted";
+
+  const [phase, setPhase] = useState<ExamPhase>("ready");
+  const [readySeconds, setReadySeconds] = useState(READY_DURATION_SECONDS);
+  const [examSeconds, setExamSeconds] = useState(EXAM_DURATION_SECONDS);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [selectedSubjectiveIndex, setSelectedSubjectiveIndex] = useState<number | null>(null);
   const [subjectiveAnswers, setSubjectiveAnswers] = useState<Record<number, string>>({});
 
@@ -128,6 +143,7 @@ export default function ExamPage() {
   }, [selectedSubjectiveIndex]);
 
   const handleKeypadClick = (value: string) => {
+    if (phase !== "running") return;
     if (selectedSubjectiveIndex === null) return;
 
     setSubjectiveAnswers((prev) => {
@@ -182,6 +198,8 @@ export default function ExamPage() {
   };
 
   const handleSubmitExam = async () => {
+    if (isSubmitting || phase === "submitted") return;
+
     const objectivePayload = Object.entries(choiceAnswers).map(([number, answer]) => ({
       answerType: "objective" as const,
       number: Number(number),
@@ -210,6 +228,8 @@ export default function ExamPage() {
     };
 
     try {
+      setIsSubmitting(true);
+
       const response = await fetch("http://127.0.0.1:3001/api/exams/submit", {
         method: "POST",
         headers: {
@@ -224,6 +244,8 @@ export default function ExamPage() {
 
       const result: SubmitExamResponse = await response.json();
 
+      setPhase("submitted");
+
       navigate("/result", {
         state: {
           examTitle: result.data.title,
@@ -235,16 +257,78 @@ export default function ExamPage() {
     } catch (error) {
       console.error(error);
       alert("시험 제출 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleChoiceSelect = (question: number, option: number) => {
+    if (phase !== "running") return;
+
     setChoiceAnswers((prev) => ({
       ...prev,
       [question]: option,
     }));
   };
 
+  useEffect(() => {
+    if (phase !== "ready") return;
+
+    const timer = window.setInterval(() => {
+      setReadySeconds((prev) => {
+        if (prev <= 1) {
+          window.clearInterval(timer);
+          setPhase("running");
+          return 0;
+        }
+
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== "running") return;
+    if (isSubmitting) return;
+
+    const timer = window.setInterval(() => {
+      setExamSeconds((prev) => {
+        if (prev <= 1) {
+          window.clearInterval(timer);
+          return 0;
+        }
+
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [phase, isSubmitting]);
+
+  useEffect(() => {
+    if (phase !== "running") return;
+    if (examSeconds !== 0) return;
+    if (isSubmitting) return;
+
+    handleSubmitExam();
+  }, [phase, examSeconds, isSubmitting]);
+  //
+
+  const isReadyPhase = phase === "ready";
+
+  const progressPercent = isReadyPhase
+    ? getProgressPercent(readySeconds, READY_DURATION_SECONDS)
+    : getProgressPercent(examSeconds, EXAM_DURATION_SECONDS);
+
+  const statusTitle = isReadyPhase ? "시험이 곧 시작됩니다" : "시험이 곧 종료됩니다";
+
+  const statusTimeText = isReadyPhase
+    ? `${formatMinutesSeconds(readySeconds)} 뒤 시작`
+    : `${formatSecondsOnly(examSeconds)} 뒤에 자동으로 제출됩니다. 답안을 모두 입력해주세요.`;
+
+  const examTimeLabel = `시험 시간 ${Math.floor(EXAM_DURATION_SECONDS / 60)}분`;
   return (
     <section className="min-h-[calc(100vh-65px)] bg-[#F3F3F3]">
       <div className="flex min-h-[calc(100vh-65px)] flex-col">
@@ -342,6 +426,7 @@ export default function ExamPage() {
                           <button
                             type="button"
                             onClick={() => {
+                              if (phase !== "running") return;
                               setSelectedSubjectiveIndex(slot.id);
                             }}
                             className="absolute inset-0 z-10 bg-transparent "
@@ -479,21 +564,22 @@ export default function ExamPage() {
         <div className="border-t border-[#E5E5E5] bg-white px-8 py-8">
           <div className="mx-auto flex w-full max-w-[1560px] items-end justify-between gap-8">
             <div className="flex-1">
-              <p className="text-[24px] font-bold leading-none text-[#4B4B4B]">
-                시험이 곧 시작됩니다...
-              </p>
+              <p className="text-[24px] font-bold leading-none text-[#4B4B4B]">{statusTitle}</p>
 
               <p className="mt-4 text-[64px] font-extrabold leading-none text-[#333333]">
-                3분 17초 뒤 시작
+                {statusTimeText}
               </p>
 
               <div className="mt-6 h-[10px] w-full rounded-full bg-[#E8E8E8]">
-                <div className="h-full w-[88%] rounded-full bg-[#3C3C3C]" />
+                <div
+                  className="h-full rounded-full bg-[#3C3C3C] transition-all duration-1000"
+                  style={{ width: `${progressPercent}%` }}
+                />
               </div>
             </div>
 
             <div className="flex min-w-[340px] items-center justify-end gap-8 pb-2">
-              <span className="text-[22px] font-bold text-[#4B4B4B]">시험 시간 60분</span>
+              <span className="text-[22px] font-bold text-[#4B4B4B]">{examTimeLabel}</span>
 
               <button
                 type="button"
@@ -506,7 +592,7 @@ export default function ExamPage() {
                 onClick={handleSubmitExam}
                 className="inline-flex h-[64px] items-center justify-center rounded-[16px] bg-[#111827] px-8 text-[22px] font-bold text-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
               >
-                제출하기
+                {isSubmitting ? "제출 중..." : "제출하기"}
               </button>
             </div>
           </div>
